@@ -6,15 +6,27 @@ import time
 def nothing(x):
     pass
 
-# Initializing the webcam feed.
-cap = cv2.VideoCapture("data/video000000.mp4")
-#frame = cv2.imread("data/tu1.png")
-#cap.set(3,1280)
-#cap.set(4,720)
-#h = int(frame.shape[0]²/2)
-#w = int(frame.shape[1]/2)
-#dim = (w,h)
-#frame = cv2.resize(frame,dim,interpolation=cv2.INTER_AREA)
+img_l = [".jpg",".jpeg",".png"]
+ftype = "vid"
+
+file="data/test2_vid3.png"
+
+for i in img_l:
+    if file.find(i) != -1:
+        ftype = "img"
+    
+if ftype == "vid":
+    # Initializing the webcam feed.
+    cap = cv2.VideoCapture(file)
+    #cap.set(3,1280)
+    #cap.set(4,720)
+else:
+    frame = cv2.imread(file)    
+    #h = int(frame.shape[0]²/2)
+    #w = int(frame.shape[1]/2)
+    #dim = (w,h)
+    #frame = cv2.resize(frame,dim,interpolation=cv2.INTER_AREA)
+
 # Create a window named trackbars.
 cv2.namedWindow("Trackbars")
 
@@ -22,19 +34,22 @@ cv2.namedWindow("Trackbars")
 # H,S and V channels. The Arguments are like this: Name of trackbar,
 # window name, range,callback function. For Hue the range is 0-179 and
 # for S,V its 0-255.
-cv2.createTrackbar("L - H", "Trackbars", 0, 179, nothing)
-cv2.createTrackbar("L - S", "Trackbars", 0, 255, nothing)
-cv2.createTrackbar("L - V", "Trackbars", 0, 255, nothing)
+cv2.createTrackbar("L - H", "Trackbars", 29, 179, nothing)
+cv2.createTrackbar("L - S", "Trackbars", 127, 255, nothing)
+cv2.createTrackbar("L - V", "Trackbars", 121, 255, nothing)
 cv2.createTrackbar("U - H", "Trackbars", 179, 179, nothing)
 cv2.createTrackbar("U - S", "Trackbars", 255, 255, nothing)
 cv2.createTrackbar("U - V", "Trackbars", 255, 255, nothing)
+cv2.createTrackbar("Delay", "Trackbars", 0, 1000, nothing)
 
 while True:
 
-    # Start reading the webcam feed frame by frame.
-    ret, frame = cap.read()
-    if not ret:
-        break
+    if ftype == "vid":
+        # Start reading the webcam feed frame by frame.
+        ret, frame = cap.read()
+        if not ret:
+            break   
+
     # Flip the frame horizontally (Not required)
     #frame = cv2.flip( frame, 1 )
 
@@ -74,19 +89,25 @@ while True:
 
     # If the user presses ESC then exit the program
     key = cv2.waitKey(1)
-    if key == 27:
+    if key == ord('q'):
         break
 
     # If the user presses `s` then print this array.
     if key == ord('s'):
 
-        thearray = [[l_h,l_s,l_v],[u_h, u_s, u_v]]
+        thearray = [(l_h,l_s,l_v),(u_h, u_s, u_v)]
         print(thearray)
+        name = input("choose a name to save the array : ")
+        f=open(name,"w")
+        f.write(str(thearray))
+        f.close()
 
         # Also save this array as penval.npy
-        np.save('hsv_value',thearray)
-        break
-    time.sleep(0.5)
+        #np.save('hsv_value',thearray)
+        #break
+
+    delay = cv2.getTrackbarPos("Delay", "Trackbars")
+    time.sleep(delay/1000)
 
 # Release the camera & destroy the windows.
 #cap.release()
